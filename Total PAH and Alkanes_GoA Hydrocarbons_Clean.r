@@ -79,7 +79,7 @@ nrow(TotalAromAlk4) - nrow(TotalAromAlk5)  # should equal 440 even though there 
                                            # Non-EVOS because there are duplicates!!!
 
 # Copy entries from "AnalysisType" column to "matrix" column only for rows with NA in matrix column
-TotalAromAlk5$matrix <- as.character(TotalAromAlk5$matrix) # have to first make these columsn character strings
+TotalAromAlk5$matrix <- as.character(TotalAromAlk5$matrix) # have to first make these columns character strings
 TotalAromAlk5$AnalysisType <- as.character(TotalAromAlk5$AnalysisType)
 
 TotalAromAlk5$matrix[is.na(TotalAromAlk5$matrix)] <- TotalAromAlk5$AnalysisType[is.na(TotalAromAlk5$matrix)] 
