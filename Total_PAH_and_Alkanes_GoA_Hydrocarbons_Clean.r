@@ -15,7 +15,7 @@ head(PAH) ; str(PAH)
 PAH$TtlAromatic <- rowSums(PAH[,24:71], na.rm=T)   ; PAH[c(25:50),] # sum the chemicals across rows
 library(plyr) 
 PAH1 <- arrange(PAH, Sin)  ; head(PAH1)  # arrange by the Sample ID (Sin)
-TotalAromat <- PAH1[PAH1$Sin > 0, -c(3,8,15:71)]   # remove rows with Sin < zero and individual compound columns
+TotalAromat <- PAH1[PAH1$Sin > 0, -c(3,8,15:22,24:71)]   # remove rows with Sin < zero and individual compound columns
 
 
 ##########################
@@ -26,7 +26,7 @@ Alk <- rename(Alk, c("QCBatch"="QCbatch")) # rename QCBatch column to match QCba
 head(Alk) ; str(Alk)
 
 # extracting Total Alkanes from the spreadsheet
-TtlAlk <- Alk[,c(1,2,4:7,9:14,51)]   ; TtlAlk[c(50:70),]
+TtlAlk <- Alk[,c(1,2,4:7,9:14,20,51)]   
 #library(plyr)  # only need to run this if you haven't loaded plyr previously
 TtlAlk1 <- arrange(TtlAlk, Sin)
 TtlAlkane <- TtlAlk1[TtlAlk1$Sin > 0, ]   # remove rows with Sin < zero 
@@ -76,7 +76,7 @@ Non_EVOS <- read.csv("Non-EVOS SINs.csv") # read in the list of non_EVOS Sample 
 head(Non_EVOS) ; nrow(Non_EVOS)
 
 TotalAromAlk5 <- TotalAromAlk4[!TotalAromAlk4$Sin %in% Non_EVOS$Sin,]
-head(TotalAromAlk5) ; str(TotalAromAlk5) ; nrow(TotalAromAlk5)
+head(TotalAromAlk5) ; nrow(TotalAromAlk5)
 nrow(TotalAromAlk4) - nrow(TotalAromAlk5)  # should equal 440 even though there are 390 rows in
                                            # Non-EVOS because there are duplicates!!!
 
