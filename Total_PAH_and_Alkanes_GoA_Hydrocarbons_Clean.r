@@ -21,7 +21,7 @@ TotalAromat <- PAH1[PAH1$Sin > 0, -c(3,8,15:71)]   # remove rows with Sin < zero
 ##########################
 # Extract Total Alkanes
 Alk <- read.csv("Alkane.csv")  # read in the Alkanes data file
-#library(plyr)
+#library(plyr)  # only need to run this if you haven't loaded plyr previously
 Alk <- rename(Alk, c("QCBatch"="QCbatch")) # rename QCBatch column to match QCbatch column from PAH table
 head(Alk) ; str(Alk)
 
