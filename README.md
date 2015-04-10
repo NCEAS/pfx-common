@@ -1,5 +1,6 @@
 # pfx-common
 Shared code and documentation for the Portfolio Effects working group.
+Data files are stored and versioned on the DataONE/KNB repository.
 
 ## Working Group Members
  - Milo   Adkison
