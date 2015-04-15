@@ -22,5 +22,3 @@ Data files are stored and versioned on the DataONE/KNB repository.
  - Colette	Ward
  - Eric 	Ward
  - Ben 	Williams
-
-
