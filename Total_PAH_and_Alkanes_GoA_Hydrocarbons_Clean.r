@@ -69,7 +69,7 @@ unique(TotalAromAlk3b$matrix)
 # Replace NAs in the column "Funding" with "EVOSTC" when the value in column "FundingSource" is "EVOSTC"
 TotalAromAlk3b$Funding[is.na(TotalAromAlk3b$Funding) & TotalAromAlk3b$FundingSource=="EVOSTC"] <- "EVOSTC"
 # Remove "FundingSource" column because it is redundant now
-TotalAromAlk4 <- TotalAromAlk3b[,-c(18)]
+TotalAromAlk4 <- TotalAromAlk3b[,!names(TotalAromAlk3b) %in% c("FundingSource")]
 
 ### Remove NON-EVOSTC Samples (list confirmed by Mark Carls at NOAA Auk Bay Lab)
 Non_EVOS <- read.csv("Non-EVOS SINs.csv") # read in the list of non_EVOS Sample ID numbers
