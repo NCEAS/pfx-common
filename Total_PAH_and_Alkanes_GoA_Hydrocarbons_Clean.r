@@ -86,6 +86,10 @@ TotalAromAlk5$AnalysisType <- as.character(TotalAromAlk5$AnalysisType)
 
 TotalAromAlk5$matrix[is.na(TotalAromAlk5$matrix)] <- TotalAromAlk5$AnalysisType[is.na(TotalAromAlk5$matrix)] 
 
+# unify the case of levels in the matrix column (ex: sediment and SEDIMENT)
+library(dplyr)
+TotalAromAlk5 <- TotalAromAlk5 %>%
+                               mutate(matrix = tolower(matrix)) 
 
 #########################
 # create new CSV data file  (this should be changed to upload to repository later)
