@@ -11,8 +11,8 @@ library(httr)
 #Load data (use the following lines starting with # once the dataset is posted on AOOS)
 #URL_Ich <- "url here"
 #IchGet <- GET(URL_Ich)
-#Ich1 <- content(IchGet, as='text')
-#Ich <- read.csv(file=textConnection(Ich1), stringsAsFactors=F, na.strings = c("NA", " ", ""))
+#IchA <- content(IchGet, as='text')
+#Ich <- read.csv(file=textConnection(IchA), stringsAsFactors=F, na.strings = c("NA", " ", ""))
 
 # for now, file is in PFx shared folder -> Ichthyoplankton on Google Drive
 setwd("~/Google Drive/GoA project/Data/Datasets/Ichthyoplankton/Original files") # set to whatever working directory you're using
