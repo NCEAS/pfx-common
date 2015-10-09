@@ -50,3 +50,23 @@ ggplot(data=fWorld) +
         plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm")) +
   guides(colour = guide_legend(override.aes = list(size=6)))
 
+
+# Sample script for mapping sites in individual years:
+Ich81 <- filter(IchSites, year == 1981)
+
+ggplot(data=fWorld) +
+  geom_map(map=fWorld,aes(x=long,y=lat,map_id=id)) +
+  coord_map(xlim = c(-165.5, -147),ylim = c(53.5, 60.5)) + 
+  scale_fill_manual(values=colMap) +
+  geom_point(data=Ich81,mapping=aes(x=Longitude, y=Latitude,colour=Purpose),size=2,alpha=0.5, shape=20) +
+  ggtitle('All Sites, All Years') +
+  theme(axis.line=element_line(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.position='right',
+        axis.text=element_text(size=8),
+        title=element_text(size=12,face="bold"),
+        plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm")) +
+  guides(colour = guide_legend(override.aes = list(size=6)))
