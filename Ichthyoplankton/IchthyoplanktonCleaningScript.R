@@ -38,8 +38,28 @@ Ich1 = Ich %>%
 head(Ich1)
 
 
-unique(sort(Ich1$IchName))
 
-# insert binning script here once categories are finalized
+# visualize sample timing
+IchMonths=Ich1 %>%
+  mutate(myp=paste(month,year,Purpose)) %>%
+  filter(!duplicated(myp)) %>%
+  select(month,year,Purpose)
+plot(IchMonths$month ~ IchMonths$year, pch=16) # consider removing March & April samples in 1985
+
+
+# Binning:
+unique(sort(Ich1$IchName)) 
+# Janet advises that some taxa should be binned prior to analyses.
+# Her advice for binning is in "Final IchName list for binning_Sept 28 2015.xlsx" in the shared Ichthyoplankton folder on Google Drive
+
+# I'm not sure how you want the spreadsheet to be organized for analyses so it's probably best you take over the scripting from here
+# I'd been thinking about doing something like this:
+# create new empty BinnedTaxa column in Ich1
+# then create binning instructions; example for Anoplarchus spp.:
+Ano_sp = c("Anoplarchus insignis", "Anoplarchus purpurescens", "Anoplarchus spp.")
+# then some kind of if statement, eg: if (IchName %in% Ano_sp)  { then assign "Anoplarchus spp." in the BinnedTaxa column }
+# etc for all taxa
+# then use dplyr package to: group_by(column i, ... ,  column n, BinnedTaxa) %>% summarise(density=sum(CatchPer10m2)) %>% ungroup
+
 
 # then use spread () to make each species' CatchPer10m2 into a column
