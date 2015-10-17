@@ -41,7 +41,7 @@ SMTmetadata=SMTh %>%
   rename(bottomDepth = bottom_depth.m.) %>%
   rename(gearTemp = gear_temp.c.) %>%
   select(-fish_date, -Date, -year1, -month1, -day1, -lat_end, -lon_end)
-View(SMTmetadata)
+#View(SMTmetadata)
 str(SMTmetadata)
 
 
@@ -62,6 +62,8 @@ SMTcatch = SMTc %>%
 head(SMTcatch)
 str(SMTcatch)
 
+
+
 # Some hauls have multiple catchkg and catchnum entries for the same species
 # Sum catchkg and catchNum over rows for which cruise, haul, and race_code are identical 
 # (as per email conversation with Kally Spalinger (ADFG), July 2015)
@@ -70,10 +72,11 @@ SMTcatchAgg = SMTcatch %>%
   group_by(cruise, haul, raceCode) %>%
   summarise(catchKg=sum(catchkg), catchNum=sum(catchnum)) %>%
   ungroup
-View(SMTcatchAgg)
+#View(SMTcatchAgg)
 str(SMTcatchAgg)
 # Test:
 # For cruise=7759, haul=128, race_code=10130: catchkg should be 23.587+2.268 = 25.8550.  Yes.
+
 
 
 # Work with catchKg from here onwards, because catchNum is not always recorded.
@@ -81,7 +84,6 @@ str(SMTcatchAgg)
 SMTcatchSpread = SMTcatchAgg %>%
   select(-catchNum) %>%
   spread(raceCode,catchKg,fill=0)
-View(SMTcatchSpread)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -97,7 +99,12 @@ SMTcatchSpread1 = SMTcatchSpread %>%
   select(-cruise, -haul) # remove these for ease of joining dataframes below
 str(SMTcatchSpread1) 
 
-# join the dataframes
-SMT = full_join(SMTmetadata1, SMTcatchSpread1, by = "Sample")
-View(SMT)
+
+# join the dataframes (merge metadata onto catch because some hauls in metadata are excluded from catch because of poor gear performance)
+SMT = right_join(SMTmetadata1, SMTcatchSpread1, by = "Sample")
+#View(SMT)
 str(SMT)
+# Check for NAs (should be all FALSE)
+for(i in 1:ncol(SMT)){
+  print(any(is.na(SMT[,i])))
+}
