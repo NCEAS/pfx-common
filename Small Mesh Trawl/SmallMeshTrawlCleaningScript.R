@@ -47,6 +47,54 @@ str(SMTmetadata)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
+# Load taxonomic codes
+URL_SMTt <- "https://drive.google.com/uc?export=download&id=0B1XbkXxdfD7uTXpuUWFBbDBrN0E"
+SMTtGet <- GET(URL_SMTt)
+SMTt1 <- content(SMTtGet, as='text')
+SMTt <- read.csv(file=textConnection(SMTt1),stringsAsFactors=F)
+head(SMTt)
+str(SMTt)
+
+# Clean up column names
+SMTtaxa = SMTt %>%
+  rename(raceCode = rcode) %>%
+  rename(comName = common_name) %>%
+  rename(sciName = scientific_name)
+head(SMTtaxa)
+str(SMTtaxa)
+
+
+# Clean up sciName
+SMTtaxa1 = SMTtaxa %>%
+  mutate(sciName = gsub("Class ", "", sciName)) %>%
+  mutate(sciName = gsub("Family ", "", sciName)) %>%
+  mutate(sciName = gsub("Order ", "", sciName)) %>%
+  mutate(sciName = gsub("Phylum ", "", sciName)) %>%
+  mutate(sciName = gsub(" unident.", "", sciName)) %>%
+  mutate(sciName = gsub("\\(|\\)", "", sciName)) %>% # remove brackets
+  mutate(sciName = gsub("Platichthys stellatus X Pleuronectes qua", "HybridPstellatusPqua", sciName)) %>%
+  mutate(sciName = gsub("Podothecus (or Agonus) acipenserinus", "Podothecus acipenserinus", sciName)) %>% 
+  mutate(sciName = gsub("Delolepis gigantea (or Cryptacanthodes giganteus)", "Delolepis gigantea", sciName)) %>%
+  mutate(sciName = gsub("\\=", "", sciName)) %>% # remove "="
+  mutate(sciName = gsub("Sebastes (Sebastomus) sp.", "Sebastes", sciName)) %>%
+  mutate(sciName = gsub("Cryptonatica Natica aleutica", "Cryptonatica aleutica", sciName)) %>%
+  mutate(sciName = gsub("Basketstarfish use 83020", "Gorgonocephalus eucnemis", sciName)) %>%
+  mutate(sciName = gsub(" sp.$", "", sciName))
+
+for(j in 1:nrow(SMTtaxa1)) {
+  if(SMTtaxa1$raceCode[j] == 29999) {SMTtaxa1$sciName[j] <- "Roundfish"
+  }
+  if(SMTtaxa1$raceCode[j] == 30150) {SMTtaxa1$sciName[j] <- "Sebastes" # assign 30150 (dusky rockfishes unid.) to Sebastes
+  }
+  if(SMTtaxa1$raceCode[j] == 30590) {SMTtaxa1$sciName[j] <- "Sebastes" # assign 30590 (red rockfish unident.) to Sebastes
+  }
+}
+SMTtaxa1
+str(SMTtaxa1)
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
 # Load biological data ("adfg_smallmesh_catch.csv")
 URL_SMTc <- "https://drive.google.com/uc?export=download&id=0B1XbkXxdfD7uekVENlBqaFJLaWM"
 SMTcGet <- GET(URL_SMTc)
@@ -62,20 +110,37 @@ SMTcatch = SMTc %>%
 head(SMTcatch)
 str(SMTcatch)
 
+# remove unidentifiable tissue & debris:
+SMTcatch1 = SMTcatch %>%
+  filter(raceCode != 2) %>% # remove "fish larvae unident."
+  filter(raceCode != 3) %>% # remove "fish unident."
+  filter(raceCode != 401) %>% # remove "skate egg case unident."
+  filter(raceCode != 71001) %>% # remove "gastropod eggs"
+  filter(raceCode != 99000) %>% # remove "Unknown - from shrimp surveys"
+  filter(raceCode != 99990) %>% # remove "invertebrate unident."
+  filter(raceCode != 99993) %>% # remove "empty bivalve shells"
+  filter(raceCode != 99999) # remove "natural debris"
+
+# Replace raceCode with sciName
+SMTtaxa2 = SMTtaxa1 %>% 
+  select(-comName)
+SMTcatch2 = left_join(SMTcatch1, SMTtaxa2, by="raceCode")
+SMTcatch3 = SMTcatch2 %>% select(-raceCode)
+head(SMTcatch3)
 
 
 # Some hauls have multiple catchkg and catchnum entries for the same species
-# Sum catchkg and catchNum over rows for which cruise, haul, and race_code are identical 
+# Sum catchkg and catchNum over rows for which cruise, haul, and sciName are identical 
 # (as per email conversation with Kally Spalinger (ADFG), July 2015)
 
-SMTcatchAgg = SMTcatch %>%
-  group_by(cruise, haul, raceCode) %>%
+SMTcatchAgg = SMTcatch3 %>%
+  group_by(cruise, haul, sciName) %>%
   summarise(catchKg=sum(catchkg), catchNum=sum(catchnum)) %>%
   ungroup
 #View(SMTcatchAgg)
 str(SMTcatchAgg)
 # Test:
-# For cruise=7759, haul=128, race_code=10130: catchkg should be 23.587+2.268 = 25.8550.  Yes.
+# For cruise=7759, haul=128, sciName == Hippoglossoides elassodon (raceCode == 10130): catchkg should be 23.587+2.268 = 25.8550.  Yes.
 
 
 
@@ -83,7 +148,7 @@ str(SMTcatchAgg)
 # For catchKg, make each species into a column; now data are organized by Haul:
 SMTcatchSpread = SMTcatchAgg %>%
   select(-catchNum) %>%
-  spread(raceCode,catchKg,fill=0)
+  spread(sciName,catchKg,fill=0)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -100,11 +165,7 @@ SMTcatchSpread1 = SMTcatchSpread %>%
 str(SMTcatchSpread1) 
 
 
-# join the dataframes (merge metadata onto catch because some hauls in metadata are excluded from catch because of poor gear performance)
+# join the dataframes (merge metadata onto catch because some hauls are excluded from catch db because of poor gear performance)
 SMT = right_join(SMTmetadata1, SMTcatchSpread1, by = "Sample")
 #View(SMT)
 str(SMT)
-# Check for NAs (should be all FALSE)
-for(i in 1:ncol(SMT)){
-  print(any(is.na(SMT[,i])))
-}
