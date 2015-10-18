@@ -28,12 +28,11 @@ SMT1 = SMT %>%
 # Calculate CUE (kg/km2):
 SMT2=SMT1 %>%
   mutate(effort = distance*0.0098) # create effort column (area swept (km2); see notes below)
-
-SMTcue = as.data.frame(sapply(SMT2[,17:333], function(x) (x/SMT2$effort))) # create table of CUE (kg/km2) for each species by haul
+SMTcue = as.data.frame(sapply(SMT2[,17:334], function(x) (x/SMT2$effort))) # create table of CUE (kg/km2) for each species by haul
 #View(SMTcue)
 
 SMT3=SMT2 %>%
-  select(-c(17:333)) # remove original absolute catchKg data
+  select(-c(17:334)) # remove original absolute catchKg data
 SMT4=bind_cols(SMT3, SMTcue) # merge CUE with metadata
 #View(SMT4)
 

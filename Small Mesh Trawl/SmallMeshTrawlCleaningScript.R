@@ -82,12 +82,14 @@ SMTtaxa1 = SMTtaxa %>%
   mutate(sciName = gsub(" sp.$", "", sciName))
 
 for(j in 1:nrow(SMTtaxa1)) {
-  if(SMTtaxa1$raceCode[j] == 29999) {SMTtaxa1$sciName[j] <- "Roundfish"
-  }
-  if(SMTtaxa1$raceCode[j] == 30150) {SMTtaxa1$sciName[j] <- "Sebastes" # assign 30150 (dusky rockfishes unid.) to Sebastes
-  }
-  if(SMTtaxa1$raceCode[j] == 30590) {SMTtaxa1$sciName[j] <- "Sebastes" # assign 30590 (red rockfish unident.) to Sebastes
-  }
+  if(SMTtaxa1$raceCode[j] == 29999) {SMTtaxa1$sciName[j] <- "Roundfish"}
+  if(SMTtaxa1$raceCode[j] == 21740) {SMTtaxa1$sciName[j] <- "Gadus chalcogrammus adult"}
+  if(SMTtaxa1$raceCode[j] == 21741) {SMTtaxa1$sciName[j] <- "Gadus chalcogrammus juv"}
+  if(SMTtaxa1$raceCode[j] == 21720) {SMTtaxa1$sciName[j] <- "Gadus macrocephalus adult"}
+  if(SMTtaxa1$raceCode[j] == 21721) {SMTtaxa1$sciName[j] <- "Gadus macrocephalus juv"}
+  if(SMTtaxa1$raceCode[j] == 21722) {SMTtaxa1$sciName[j] <- "Gadus macrocephalus adult"} # assign tagged Pacific cod to adults
+  if(SMTtaxa1$raceCode[j] == 30150) {SMTtaxa1$sciName[j] <- "Sebastes"} # assign 30150 (dusky rockfishes unid.) to Sebastes
+  if(SMTtaxa1$raceCode[j] == 30590) {SMTtaxa1$sciName[j] <- "Sebastes"} # assign 30590 (red rockfish unident.) to Sebastes
 }
 SMTtaxa1
 str(SMTtaxa1)
