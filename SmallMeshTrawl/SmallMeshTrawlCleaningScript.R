@@ -72,22 +72,20 @@ SMTtaxa1 = SMTtaxa %>%
   mutate(sciName = gsub("Phylum ", "", sciName)) %>%
   mutate(sciName = gsub(" unident.", "", sciName)) %>%
   mutate(sciName = gsub("\\(|\\)", "", sciName)) %>% # remove brackets
-  mutate(sciName = gsub("Platichthys stellatus X Pleuronectes qua", "HybridPstellatusPqua", sciName)) %>%
-  mutate(sciName = gsub("Podothecus (or Agonus) acipenserinus", "Podothecus acipenserinus", sciName)) %>% 
-  mutate(sciName = gsub("Delolepis gigantea (or Cryptacanthodes giganteus)", "Delolepis gigantea", sciName)) %>%
+  mutate(sciName = gsub("Atheresthes stomias", "Reinhardtius stomias", sciName)) %>% # update to accepted name
+  mutate(sciName = gsub("Platichthys stellatus X Pleuronectes qua", "Platichthys stellatus", sciName)) %>%
+  mutate(sciName = gsub("Podothecus (or Agonus) acipenserinus", "Podothecus accipenserinus", sciName)) %>% # update to accepted name & spelling
+  mutate(sciName = gsub("Delolepis gigantea (or Cryptacanthodes giganteus)", "Cryptacanthodes giganteus", sciName)) %>% # update to accepted name
   mutate(sciName = gsub("\\=", "", sciName)) %>% # remove "="
   mutate(sciName = gsub("Sebastes (Sebastomus) sp.", "Sebastes", sciName)) %>%
-  mutate(sciName = gsub("Cryptonatica Natica aleutica", "Cryptonatica aleutica", sciName)) %>%
+  mutate(sciName = gsub("crab", "Brachyura", sciName)) %>%
+  mutate(sciName = gsub("Cryptonatica Natica aleutica", "Cryptonatica aleutica", sciName)) %>% # update to accepted name
   mutate(sciName = gsub("Basketstarfish use 83020", "Gorgonocephalus eucnemis", sciName)) %>%
   mutate(sciName = gsub(" sp.$", "", sciName))
 
 for(j in 1:nrow(SMTtaxa1)) {
-  if(SMTtaxa1$raceCode[j] == 29999) {SMTtaxa1$sciName[j] <- "Roundfish"}
-  if(SMTtaxa1$raceCode[j] == 21740) {SMTtaxa1$sciName[j] <- "Gadus chalcogrammus adult"}
-  if(SMTtaxa1$raceCode[j] == 21741) {SMTtaxa1$sciName[j] <- "Gadus chalcogrammus juv"}
-  if(SMTtaxa1$raceCode[j] == 21720) {SMTtaxa1$sciName[j] <- "Gadus macrocephalus adult"}
-  if(SMTtaxa1$raceCode[j] == 21721) {SMTtaxa1$sciName[j] <- "Gadus macrocephalus juv"}
-  if(SMTtaxa1$raceCode[j] == 21722) {SMTtaxa1$sciName[j] <- "Gadus macrocephalus adult"} # assign tagged Pacific cod to adults
+  if(SMTtaxa1$raceCode[j] == 29999) {SMTtaxa1$sciName[j] <- "Acanthopterygii"}
+  if(SMTtaxa1$raceCode[j] == 21741) {SMTtaxa1$sciName[j] <- "Gadus chalcogrammus"} # update to accepted name
   if(SMTtaxa1$raceCode[j] == 30150) {SMTtaxa1$sciName[j] <- "Sebastes"} # assign 30150 (dusky rockfishes unid.) to Sebastes
   if(SMTtaxa1$raceCode[j] == 30590) {SMTtaxa1$sciName[j] <- "Sebastes"} # assign 30590 (red rockfish unident.) to Sebastes
 }
@@ -123,20 +121,17 @@ SMTcatch1 = SMTcatch %>%
   filter(raceCode != 99993) %>% # remove "empty bivalve shells"
   filter(raceCode != 99999) # remove "natural debris"
 
-# Replace raceCode with sciName
-SMTtaxa2 = SMTtaxa1 %>% 
-  select(-comName)
-SMTcatch2 = left_join(SMTcatch1, SMTtaxa2, by="raceCode")
-SMTcatch3 = SMTcatch2 %>% select(-raceCode)
-head(SMTcatch3)
+# Add sciName & comName to biological dataset
+SMTcatch2 = left_join(SMTcatch1, SMTtaxa1, by="raceCode")
+head(SMTcatch2)
 
 
 # Some hauls have multiple catchkg and catchnum entries for the same species
 # Sum catchkg and catchNum over rows for which cruise, haul, and sciName are identical 
 # (as per email conversation with Kally Spalinger (ADFG), July 2015)
 
-SMTcatchAgg = SMTcatch3 %>%
-  group_by(cruise, haul, sciName) %>%
+SMTcatchAgg = SMTcatch2 %>%
+  group_by(cruise, haul, raceCode, comName, sciName) %>%
   summarise(catchKg=sum(catchkg), catchNum=sum(catchnum)) %>%
   ungroup
 #View(SMTcatchAgg)
@@ -145,12 +140,36 @@ str(SMTcatchAgg)
 # For cruise=7759, haul=128, sciName == Hippoglossoides elassodon (raceCode == 10130): catchkg should be 23.587+2.268 = 25.8550.  Yes.
 
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-# Work with catchKg from here onwards, because catchNum is not always recorded.
-# For catchKg, make each species into a column; now data are organized by Haul:
-SMTcatchSpread = SMTcatchAgg %>%
-  select(-catchNum) %>%
-  spread(sciName,catchKg,fill=0)
+# Add higher order taxonomic information to biological dataset
+
+# Query ITIS for higher order taxonomic information:
+#SMTsp <- unique(SMTcatchAgg$sciName)
+#tax.info = tax_name(query = SMTsp, 
+#                    get = c("phylum", "subphylum", "class", "subclass", "infraclass", 
+#                            "order", "suborder", "infraorder", "suborder", "infraorder", "family", 
+#                            "genus", "species"), 
+#                    db = "itis")
+#View(tax.info)
+#SMTtaxinfo = tax.info %>%
+#  mutate(sciName = query) %>%
+#  select(-db, -query)
+#View(SMTtaxinfo)
+#setwd()
+#write.csv(SMTtaxinfo, file = "SMT_Taxonomic_Info.csv", row.names=F)
+
+# The above code to create tax.info takes 25min to run with sporadic inputs needed
+# upload the resulting file from here instead:
+URL_SMTtaxinfo1 <- "https://drive.google.com/uc?export=download&id=0B1XbkXxdfD7uSERzVENUR0o1emM"
+SMTtaxinfo1Get <- GET(URL_SMTtaxinfo1)
+SMTtaxinfo1 <- content(SMTtaxinfo1Get, as='text')
+SMTtaxinfo <- read.csv(file=textConnection(SMTtaxinfo1),stringsAsFactors=F)
+#View(SMTtaxinfo)
+
+# Join taxonomic info to biological data
+SMTbiol = right_join(SMTtaxinfo, SMTcatchAgg, by = "sciName")
+#View(SMTbiol)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -161,13 +180,13 @@ SMTmetadata1 = SMTmetadata %>%
   unite(Sample, cruise:haul, sep=" ", remove=FALSE)
 str(SMTmetadata1)
 
-SMTcatchSpread1 = SMTcatchSpread %>%
+SMTbiol1 = SMTbiol %>%
   unite(Sample,cruise:haul,sep=" ",remove=FALSE) %>%
   select(-cruise, -haul) # remove these for ease of joining dataframes below
-str(SMTcatchSpread1) 
+str(SMTbiol1) 
 
 
 # join the dataframes (merge metadata onto catch because some hauls are excluded from catch db because of poor gear performance)
-SMT = right_join(SMTmetadata1, SMTcatchSpread1, by = "Sample")
-#View(SMT)
+SMT = right_join(SMTmetadata1, SMTbiol1, by = "Sample")
+View(SMT)
 str(SMT)
