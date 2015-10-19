@@ -5,9 +5,15 @@
 ######################################################################
 
 # call output from Small Mesh Trawl cleaning script
-source('SmallMeshTrawlCleaningScript.R')
+sourceDir <- function(path, trace=TRUE) {
+  for (nm in list.files(path, pattern = "[.][Rr]$")) {
+    if(trace) cat(nm,":")
+    source(file.path(path, nm))
+    if(trace) cat("\n")
+  }
+}
+sourceDir("SmallMeshTrawl")
 #View(SMT)
-
 
 
 # Select hauls to use:
