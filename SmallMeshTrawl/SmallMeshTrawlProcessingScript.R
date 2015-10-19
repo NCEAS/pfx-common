@@ -33,14 +33,13 @@ SMT1 = SMT %>%
 
 # Calculate CUE (kg/km2):
 SMT2=SMT1 %>%
-  mutate(effort = distance*0.0098) # create effort column (area swept (km2); see notes below)
-SMTcue = as.data.frame(sapply(SMT2[,17:334], function(x) (x/SMT2$effort))) # create table of CUE (kg/km2) for each species by haul
-#View(SMTcue)
+  mutate(effort = distance*0.0098) %>% # create effort column (area swept (km2); see notes below)
+  select(-catchNum) %>%
+  mutate(cue = catchKg/effort)
+View(SMT2)
+# check: cruise 152, haul 1, CUE should be:
+2.7/0.01451968 # 185.9545. Yes.
 
-SMT3=SMT2 %>%
-  select(-c(17:334)) # remove original absolute catchKg data
-SMT4=bind_cols(SMT3, SMTcue) # merge CUE with metadata
-#View(SMT4)
 
 # Effort
 # Standardized to area towed (vs temporal duration) because sampling protocol aims to trawl over a standard distance, and temporal duration can reflect things that affect tow speed
