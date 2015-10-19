@@ -4,17 +4,26 @@
 #####             and                                             #####
 #######################################################################
 
-## load packages
-library(dplyr)
+
+# Call output from cleaning script
+sourceDir <- function(path, trace=TRUE) {
+  for (nm in list.files(path, pattern = "[.][Rr]$")) {
+    if(trace) cat(nm,":")
+    source(file.path(path, nm))
+    if(trace) cat("\n")
+  }
+}
+sourceDir("Ichthyoplankton") # returns error message but it's not a problem
+head(Ich1)
+
+
+## load additional packages
 library(rworldmap)
 library(rworldxtra)
 library(rgdal)
 library(ggplot2)
 library(grid)
 
-# Call output from cleaning script
-source('IchthyoplanktonCleaningScript.R')
-head(Ich1)
 
 # extract unique sampling events
 IchSites=Ich1 %>%
