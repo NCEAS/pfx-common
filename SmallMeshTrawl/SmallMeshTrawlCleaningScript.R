@@ -78,6 +78,9 @@ SMTtaxa1 = SMTtaxa %>%
   mutate(sciName = gsub("Delolepis gigantea (or Cryptacanthodes giganteus)", "Cryptacanthodes giganteus", sciName)) %>% # update to accepted name
   mutate(sciName = gsub("\\=", "", sciName)) %>% # remove "="
   mutate(sciName = gsub("Sebastes (Sebastomus) sp.", "Sebastes", sciName)) %>%
+  mutate(sciName = gsub("Decapoda", "Caridea", sciName)) %>%
+  mutate(sciName = gsub("Eualus macrophthalmus", "Eualus macropthalmus", sciName)) %>% # correct a spelling error
+  mutate(sciName = gsub("Crangon communis", "Neocrangon communis", sciName)) %>% # update to accepted name
   mutate(sciName = gsub("crab", "Brachyura", sciName)) %>%
   mutate(sciName = gsub("Cryptonatica Natica aleutica", "Cryptonatica aleutica", sciName)) %>% # update to accepted name
   mutate(sciName = gsub("Basketstarfish use 83020", "Gorgonocephalus eucnemis", sciName)) %>%
