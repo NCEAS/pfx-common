@@ -150,7 +150,7 @@ str(SMTcatchAgg)
 # Reorganize each taxon's catchKg into a column; now data are organized by Haul:
 SMTcatchSpread = SMTcatchAgg %>%
   select(-catchNum) %>%
-  spread(sciName,catchKg,fill=0)
+  spread(sciName,catchKg) #,fill=0) use this if we want to use zero catches in analyses
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
