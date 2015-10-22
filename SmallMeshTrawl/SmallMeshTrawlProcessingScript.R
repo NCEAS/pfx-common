@@ -18,7 +18,7 @@ sourceDir("SmallMeshTrawl")
 
 # Select hauls to use:
 SMT1 = SMT %>%
-  filter(month %in% c(9,10)) #%>% # select Sept & Oct samples (most consistent across years)
+  filter(month %in% c(7,8,9,10)) #%>% # select Sept & Oct samples (most consistent across years)
   #filter(bottom_depth.m.>= ) %>% # select depth range (see notes below)
   #filter(bottom_depth.m.<= ) # select depth range
 #View(SMT1)
