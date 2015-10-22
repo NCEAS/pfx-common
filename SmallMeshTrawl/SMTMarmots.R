@@ -15,17 +15,17 @@ sourceDir <- function(path, trace=TRUE) {
 sourceDir("SmallMeshTrawl")
 #View(SMT2)
 
-Marmots = SMT2 %>%
+Marmots = SMT4 %>%
   filter(bay %in% c(1002, 1003))
 
 
 
 # Which taxa comprise the most biomass?
-MarImp = as.data.frame(colSums(Marmots[,18:335])) # sum each taxa's CUE across all years
-#View(MarImp)
-colnames(MarImp)[which(colnames(MarImp)=="colSums(Marmots[, 18:335])")] = "TotCUE" #rename the column
-MarImp[["colSums(SMT4[,18:335])"]]
-MarImp1 = data.frame(Taxon=colnames(Marmots[,18:335]),MarImp) %>%
+MarImp = as.data.frame(colSums(Marmots[,18:335], na.rm=T)) # sum each taxa's CUE across all years
+View(MarImp)
+colnames(MarImp)[which(colnames(MarImp)=="colSums(Marmots[, 18:335], na.rm = T)")] = "TotCUE" #rename the column
+MarImp[["colSums(Marmots[, 18:335], na.rm = T)"]]
+MarImp1 = data.frame(Taxon=colnames(Marmots[, 18:335]), MarImp) %>%
   mutate(percent=(TotCUE/sum(TotCUE))*100) %>%
   arrange(desc(percent))
 View(MarImp1)
