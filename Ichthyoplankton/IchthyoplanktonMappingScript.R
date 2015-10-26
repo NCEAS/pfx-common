@@ -16,7 +16,7 @@ sourceDir <- function(path, trace=TRUE) {
 sourceDir("Ichthyoplankton") # returns error message but it's not a problem
 head(Ich1)
 
-#i like fish
+#i like fish, but not fishbots
 
 ## load additional packages
 library(rworldmap)
