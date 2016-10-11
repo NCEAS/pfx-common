@@ -1,0 +1,74 @@
+
+```{r, include=FALSE, echo=FALSE, results='hide'}
+# Load all necessary packages
+library(plyr) ; library(dplyr); library(tidyr) ; library(stringr) ; 
+library(sp) ; library(maptools) ; library(raster) ; library(ggplot2) ; 
+library(maps) ; library(mapdata) ; library(mapproj) ; library(httr) ; library(extrafont) ; 
+library(vegan) ; library(scales) ; library(gridExtra)
+```
+
+```{r,  include=FALSE, echo=FALSE, results='hide'}
+# Load the CPUE by Area data and merge in trawl species list
+URL_SPCPUEArea <- "https://drive.google.com/uc?export=download&id=0By1iaulIAI-uYzBOUFRtZklmX0U"
+SPCPUEArea_Get <- GET(URL_SPCPUEArea)
+SPCPUEArea_1 <- content(SPCPUEArea_Get, as='text')
+SPCPUEArea <- read.csv(file=textConnection(SPCPUEArea_1), stringsAsFactors=FALSE, header=TRUE)
+
+meanCPUE <- rename(SPCPUEArea, Year=year, Area=area)
+
+
+```
+
+```{r, include=FALSE, echo=FALSE, results='hide'}
+# Read in deeper areas data CPUE
+URL_deepCPUE <- "https://drive.google.com/uc?export=download&id=0By1iaulIAI-uVF9VWnNPX3Z3S3c"
+deepCPUE_Get <- GET(URL_deepCPUE)
+deepCPUE_1 <- content(deepCPUE_Get, as='text')
+deepCPUE <- read.csv(file=textConnection(deepCPUE_1),stringsAsFactors=FALSE,head=TRUE)
+
+deepCPUE <- rename(deepCPUE, Year=year, Area=area)
+
+```
+
+```{r, include=F}
+#combine shallow and deep
+
+deepCPUE$Area=as.factor(deepCPUE$Area)
+meanCPUE$Area=as.factor(meanCPUE$Area)
+#remove Total
+
+deepCPUE_cut=deepCPUE[-which(deepCPUE$Area=='Total'),]
+meanCPUE_cut=meanCPUE[-which(meanCPUE$Area=='Total'),]
+
+deepCPUE_cut$Area=as.numeric(deepCPUE_cut$Area)
+deepCPUE_cut$Area=deepCPUE_cut$Area+9
+
+CPUE_all=rbind(deepCPUE_cut,meanCPUE_cut)
+
+
+area_new=c('PWS/Cook Inlet','Southeast','Kodiak','Alaska Peninsula')
+
+#Convert Mary's diversity areas to Anne's commercial catch areas
+PWSCI=c(1,2,3,4,10)
+KOD=c(5,6,7,8,11,12)
+AKP=c(9,13,14)
+
+CPUE_all$Area=as.factor(CPUE_all$Area)
+CPUE_all$AreaSyn=NA
+CPUE_all$AreaSyn[CPUE_all$Area %in% PWSCI]='PWS/Cook Inlet'
+CPUE_all$AreaSyn[CPUE_all$Area %in% KOD]='Kodiak'
+CPUE_all$AreaSyn[CPUE_all$Area %in% AKP]='Alaska Peninsula'
+CPUE_all$AreaSyn=as.factor(CPUE_all$AreaSyn)
+```
+```{r}
+CPUE_agg=ddply(CPUE_all,.(AreaSyn,Year),summarise,Totalbio=sum(Mean.totalDensity))
+
+
+##CPUE_agg is the data frame to plot in the big multipanel plot
+CPUE_agg$taxa='Groundfish'
+
+gbio=ggplot(CPUE_agg, aes(Year,Totalbio)) +
+            geom_line() +
+            facet_wrap(~AreaSyn, ncol=3)
+       
+```
