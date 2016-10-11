@@ -72,3 +72,4 @@ gbio=ggplot(CPUE_agg, aes(Year,Totalbio)) +
             facet_wrap(~AreaSyn, ncol=3)
        
 ```
+
