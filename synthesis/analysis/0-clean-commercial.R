@@ -61,8 +61,7 @@ no_groundfish <- filter(d, taxa != "Groundfish") %>% mutate(jackknife = "Groundf
 all <- mutate(d, jackknife = "None")
 rm(d)
 gc()
-all <- dplyr::filter(all, !is.na(revenue))
-gc()
+all <- all[!is.na(all$revenue), ]
 
 diversity <- bind_rows(all, no_salmon) %>% 
   bind_rows(no_invertebrates) %>% 
