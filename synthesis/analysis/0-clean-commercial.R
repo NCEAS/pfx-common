@@ -1,4 +1,5 @@
 # data cannot be shared:
+library(dplyr)
 cfec <- feather::read_feather("~/src/pfx-commercial/portfolio/data-generated/cfec.feather")
 # convert 6-dig p_fshy codes to 5 digits
 # removing blank space - now they're all length(5)
@@ -22,15 +23,14 @@ cfec$p_spec[cfec$p_spec %in% c("O","P","Q","U","Z")] = "Invert"
 cfec$p_spec[cfec$p_spec %in% c("M")] = "Misc"
 cfec$p_spec[cfec$p_spec %in% c("S")] = "Salmon"
 cfec$p_spec[cfec$p_spec %in% c("Y")] = "Rockfish"
-cfec <- filter(cfec, p_spec != "Freshwater") # only 1400 rows
+cfec <- dplyr::filter(cfec, p_spec != "Freshwater") # only 1400 rows
 
-library(tidyverse)
-
-# look_up <- read_csv("data/cfec-codes.csv")
+# look_up <- readr::read_csv("data/cfec-codes.csv")
 # look_up <- look_up %>% mutate(p_fshy = gsub(" ", "", p_fshy))
 
 d <- select(cfec, p_holder, p_fshy, g_earn, region, p_spec, specn, year, g_pounds)
 rm(cfec)
+gc()
 
 d$taxa = NA
 d$taxa[d$p_spec %in%c("Halibut", "Sablefish", "Lingcod", "Rockfish", "Misc")] = "Groundfish"
@@ -59,17 +59,21 @@ no_invertebrates <- filter(d, taxa != "Invertebrate") %>% mutate(jackknife = "In
 no_herring <- filter(d, taxa != "Herring") %>% mutate(jackknife = "Herring")
 no_groundfish <- filter(d, taxa != "Groundfish") %>% mutate(jackknife = "Groundfish")
 all <- mutate(d, jackknife = "None")
+rm(d)
+gc()
+all <- dplyr::filter(all, !is.na(revenue))
+gc()
 
 diversity <- bind_rows(all, no_salmon) %>% 
   bind_rows(no_invertebrates) %>% 
   bind_rows(no_herring)  %>% 
   bind_rows(no_groundfish) %>% 
   group_by(jackknife, p_holder, region_combined, year, specn) %>%
-  summarize(revenue = sum(g_earn))%>%
+  summarize(revenue = sum(g_earn, na.rm = TRUE))%>%
   ungroup() %>% group_by(jackknife, p_holder, year, region_combined) %>% 
   summarize(species_diversity = simp.div(revenue)) %>% 
   ungroup() %>% group_by(jackknife, year, region_combined) %>% 
-  summarize(mean_species_diversity = mean(species_diversity)) %>% 
+  summarize(mean_species_diversity = mean(species_diversity, na.rm = TRUE)) %>% 
   ungroup()
 
 readr::write_csv(revenue, "portfolio/data-generated/commercial-region-revenue.csv")
