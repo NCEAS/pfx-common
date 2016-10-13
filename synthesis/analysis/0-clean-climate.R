@@ -133,9 +133,42 @@ cl <- bind_rows(cl, sst) %>% ungroup() %>%
 
 saveRDS(cl, "synthesis/data/generated/climate-sst.rds")
 
-library(lubridate)
-ggplot(cl, aes(time, value)) + #geom_point(alpha = 0.1) +
+# -------
+up <- readr::read_csv("synthesis/data/raw/PFEL_Upwelling.csv")
+up <- up[!grepl("Year", up$Year), ]
+up <- up[!is.na(up$Year), ]
+up <- up[!is.na(up$Mar), ]
+up <- as.data.frame(up)
+for (i in 3:ncol(up)) {
+  up[,i] <- as.numeric(up[,i])
+}
+names(up)[4:ncol(up)] <- 1:12
+up <- reshape2::melt(up, id.vars = c("Lat", "Lon", "Year"))
+up <- mutate(up, time = lubridate::ymd(paste(Year, variable, "01")))
+up2 <- group_by(up, time) %>%
+  summarise(value = mean(value)) %>%
+  ungroup() %>%
+  arrange(time) %>%
+  mutate(value_roll = zoo::rollmean(value, k = 12, fill = NA)) %>%
+  mutate(index = "Upwelling") %>%
+  mutate(year = lubridate::year(time))
+
+cl2 <- bind_rows(cl, up2)
+
+fr <- read.csv("synthesis/data/raw/freshwaterDischarge.csv", header = T, comment.char = "#") %>%
+  mutate(year = floor(DecimalYear), time = as.Date(lubridate::date_decimal(DecimalYear))) %>%
+  rename(value = Total_discharge_Seward) %>%
+  select(year, time, value) %>%
+  arrange(time) %>%
+  mutate(value_roll = zoo::rollmean(value, k = 12, fill = NA)) %>%
+  mutate(index = "Freshwater discharge")
+
+cl3 <- bind_rows(cl2, fr)
+
+ggplot(cl3, aes(time, value)) + #geom_point(alpha = 0.1) +
   geom_line(aes(y = value_roll), col = "black") +
   facet_wrap(~index, ncol=1, scales = "free_y") +
-  xlim(ymd("1980-01-01"), ymd("2016-01-01")) +
+  xlim(ymd("1970-01-01"), ymd("2016-01-01")) +
   theme_light()
+
+saveRDS(cl3, "synthesis/data/generated/climate-all.rds")
