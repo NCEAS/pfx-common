@@ -15,6 +15,23 @@ pdo <- rpdo::pdo %>%
 
 d <- bind_rows(pdo, npgo)
 
-ggplot(d, aes(time, value)) + geom_point(alpha = 0.5) +
-  geom_smooth(span = 0.1, se = FALSE, color = "red", method = "loess") +
-  facet_wrap(~index, nrow=2)
+enso <- read.table("synthesis/data/raw/enso.txt", comment.char = "#", header = T) %>%
+  dplyr::as_data_frame()
+names(enso) <- c("year", seq_len(12))
+enso <- reshape2::melt(enso, id.vars = "year") %>%
+  mutate(time = lubridate::ymd(paste(year, variable, "01"))) %>%
+  mutate(index = "ENSO")
+
+d <- bind_rows(d, enso) %>%
+
+d <- group_by(d, index) %>%
+  arrange(time) %>%
+  mutate(value_roll = zoo::rollmean(value, k = 12, fill = NA))
+
+ggplot(d, aes(time, value)) + geom_point(alpha = 0.1) +
+  geom_line(aes(y = value_roll), col = "red") +
+  facet_wrap(~index, nrow=3)
+
+d %>% select(-Year, -Month, -year, -variable) %>%
+  mutate(year = lubridate::year(time)) %>%
+  saveRDS("synthesis/data/generated/climate.rds")
