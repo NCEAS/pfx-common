@@ -1,6 +1,8 @@
 library(ggplot2)
 library(dplyr)
 
+dir.create("synthesis/data/generated/", showWarnings = FALSE)
+
 npgo <- read.table("synthesis/data/raw/npgo.txt", comment.char = "#", header = T) %>%
   dplyr::as_data_frame() %>%
   rename(year = YEAR, month = MONTH, npgo = NPGO_index) %>%
