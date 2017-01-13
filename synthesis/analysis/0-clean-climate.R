@@ -134,6 +134,7 @@ cl <- bind_rows(cl, sst) %>% ungroup() %>%
 saveRDS(cl, "synthesis/data/generated/climate-sst.rds")
 
 # -------
+library(lubridate)
 up <- readr::read_csv("synthesis/data/raw/PFEL_Upwelling.csv")
 up <- up[!grepl("Year", up$Year), ]
 up <- up[!is.na(up$Year), ]

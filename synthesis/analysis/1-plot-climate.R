@@ -34,3 +34,11 @@ ggplot(aes(time, value, colour = index)) +
   theme_light() +
   scale_colour_manual(values = cols)
 
+d2 <- read.csv("synthesis/data/raw/prices_by_speciesYear.csv")
+d2 <- group_by(d2, spec) %>% mutate(price_rel = priceDollars / priceDollars[year==1985])
+
+filter(d2, spec %in% c(""))
+ggplot(d2, aes(year, price_rel, colour = spec)) +
+  geom_line() +
+  theme_light() +
+  scale_color_brewer(palette = "Set1")
