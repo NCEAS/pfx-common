@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 d <- readRDS("synthesis/data/generated/climate-all.rds")
+dir.create("synthesis/figs", showWarnings = FALSE)
 
 lu <- tibble(index = c("PDO", "NPGO", "ENSO", "SST", "Upwelling", "Freshwater discharge"
 ), group = c("Climate", "Climate", "Climate", "SST", "Upwelling", "Freshwater discharge"))
@@ -33,6 +34,8 @@ ggplot(aes(time, value, colour = index)) +
   xlim(ymd("1978-01-01"), ymd("2016-01-01")) +
   theme_light() +
   scale_colour_manual(values = cols)
+ggsave("synthesis/figs/climate.pdf", width = 7, height = 6)
+ggsave("synthesis/figs/climate.png", width = 7, height = 6)
 
 d2 <- read.csv("synthesis/data/raw/prices_by_speciesYear.csv")
 d2 <- group_by(d2, spec) %>% mutate(price_rel = priceDollars / priceDollars[year==1985])

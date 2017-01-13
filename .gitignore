@@ -3,3 +3,9 @@
 .RData
 *.Rproj
 synthesis/data/generated/*
+
+synthesis/figs/biology-and-fisheries.pdf
+
+synthesis/figs/climate.pdf
+
+synthesis/figs/climate.png

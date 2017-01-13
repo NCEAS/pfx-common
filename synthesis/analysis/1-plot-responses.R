@@ -94,4 +94,7 @@ p5 <- ggplot(biol, aes(year, bio, colour = taxa)) +
   scale_color_brewer(palette = "Set2")
 # p5
 
+
+pdf("synthesis/figs/biology-and-fisheries.pdf", width = 8, height = 6)
 gridExtra::grid.arrange(p99, p3, p5, ncol = 1)
+dev.off()
